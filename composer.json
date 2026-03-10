@@ -1,5 +1,5 @@
 {
-    "name": "weltpixel/magento2-weltpixel-mutiple-wishlist-lite",
+    "name": "weltpixel/magento2-weltpixel-mutiple-wishlist",
     "description": "WeltPixel AdvancedWishlist Module",
     "require": {
         "magento/module-wishlist": "*"
