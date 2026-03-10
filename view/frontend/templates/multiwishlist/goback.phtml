@@ -1,0 +1,11 @@
+<?php
+
+// @codingStandardsIgnoreFile
+
+/** @var \WeltPixel\AdvancedWishlist\Block\MultipleWishlistTitle $block */
+?>
+<?php if ($block->displayBackLink()) : ?>
+<div class="goback-to-multiwishlist">
+<a href="<?= $block->escapeUrl($block->getUrl('wishlist/index', ['_secure' => true])) ?>"><?= $block->escapeHtml(__('Back')) ?></a>
+</div>
+<?php endif; ?>
