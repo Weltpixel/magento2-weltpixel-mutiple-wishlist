@@ -57,7 +57,10 @@ define([
                                     method: 'POST',
                                     cache: false,
                                     global: false,
-                                    data: {wishlistId: $('#wishlist-id').val() },
+                                    data: {
+                                        wishlistId: $('#wishlist-id').val(),
+                                        form_key: $('input[name="form_key"]').val()
+                                    },
                                     success: function (response) {
                                         if (response.result) {
                                             wpWishlistPopup.closeModal();

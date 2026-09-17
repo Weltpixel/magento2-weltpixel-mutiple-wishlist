@@ -105,6 +105,78 @@ class MultipleWishlistProvider
     }
 
     /**
+     * Load a wishlist only when it belongs to the given customer.
+     *
+     * The lookup filters on the owner as well as the id, so a wishlist id belonging to somebody
+     * else simply does not match and null comes back. Both arguments must be present: with no
+     * customer id nothing is returned rather than everything, so a caller that forgets to pass one
+     * cannot silently drop the check.
+     *
+     * @param int $wishlistId
+     * @param int $customerId
+     * @return \Magento\Wishlist\Model\Wishlist|null
+     */
+    public function getCustomerWishlist($wishlistId, $customerId)
+    {
+        $wishlistId = (int)$wishlistId;
+        $customerId = (int)$customerId;
+
+        if (!$wishlistId || !$customerId) {
+            return null;
+        }
+
+        try {
+            $collection = $this->wishlistFactory->create()->getCollection()
+                ->filterByCustomerId($customerId)
+                ->addFieldToFilter('wishlist_id', $wishlistId)
+                ->setPageSize(1);
+
+            $wishlist = $collection->getFirstItem();
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return $wishlist->getId() ? $wishlist : null;
+    }
+
+    /**
+     * Load a wishlist item only when the wishlist holding it belongs to the given customer.
+     *
+     * @param int $itemId
+     * @param int $customerId
+     * @return \Magento\Wishlist\Model\Item|null
+     */
+    public function getCustomerWishlistItem($itemId, $customerId)
+    {
+        $itemId = (int)$itemId;
+        $customerId = (int)$customerId;
+
+        if (!$itemId || !$customerId) {
+            return null;
+        }
+
+        try {
+            $wishlistIds = $this->wishlistFactory->create()->getCollection()
+                ->filterByCustomerId($customerId)
+                ->getAllIds();
+
+            if (!$wishlistIds) {
+                return null;
+            }
+
+            $item = $this->wishlistItemCollectionFactory->create()
+                ->addFieldToFilter('wishlist_item_id', $itemId)
+                ->addFieldToFilter('wishlist_id', ['in' => $wishlistIds])
+                ->setPageSize(1)
+                ->getFirstItem();
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        return $item->getId() ? $item : null;
+    }
+
+    /**
      * @return \Magento\Wishlist\Model\ResourceModel\Item\Collection|null
      */
     public function getWishlistItemCollection()

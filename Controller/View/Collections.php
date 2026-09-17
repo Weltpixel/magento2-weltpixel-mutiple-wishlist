@@ -65,9 +65,16 @@ class Collections extends Action
             $customerWishlistsBlock->setProfileId($userProfileId);
             if ($this->customerSession->isLoggedIn()) {
                 $loggedInCustomerId = $this->customerSession->getCustomer()->getId();
-                $canEditWishlistFlag = $this->getRequest()->getParam('canEditWishlist', false);
+                /**
+                 * The edit flag is derived from the session rather than read from the request. It
+                 * used to come in as a `canEditWishlist` url parameter, so any logged in customer
+                 * could append it to somebody else's profile url and have the block list that
+                 * customer's private wishlists together with their sharing codes.
+                 */
+                $canEdit = $this->customerSession->isLoggedIn()
+                    && (int)$this->customerSession->getCustomerId() === (int)$customer->getId();
                 $customerWishlistsBlock->setLoggedInCustomerId($loggedInCustomerId);
-                $customerWishlistsBlock->setCanEditWishlistFlag($canEditWishlistFlag);
+                $customerWishlistsBlock->setCanEditWishlistFlag($canEdit);
             }
         }
 

@@ -45,12 +45,15 @@ class Editable extends Action
             'editable' => false
         ];
 
-        $profileCustomerId = $this->getRequest()->getParam('profile_customer_id');
-        $loggedInUserId = $this->customerSession->getCustomerId();
-
-        if ($loggedInUserId == $profileCustomerId) {
-            $result['editable'] = true;
-        }
+        /**
+         * The comparison is strict and the login is checked first. A loose compare against a
+         * session customer id of null matched an empty or absent profile_customer_id, so a guest
+         * could be told the profile was editable.
+         */
+        $result['editable'] = $this->customerSession->isLoggedIn()
+            && (int)$this->customerSession->getCustomerId()
+                === (int)$this->getRequest()->getParam('profile_customer_id')
+            && (int)$this->customerSession->getCustomerId() > 0;
 
         return $this->prepareResult($result);
     }

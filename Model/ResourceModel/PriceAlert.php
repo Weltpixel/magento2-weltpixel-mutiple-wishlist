@@ -67,10 +67,19 @@ class PriceAlert extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
      */
     public function deleteProductsFromWishlist(\Magento\Framework\Model\AbstractModel $object, $wishlistId, $productIds)
     {
+        if (empty($productIds)) {
+            return $this;
+        }
+
         $connection = $this->getConnection();
         $where = [];
         $where[] = $connection->quoteInto('wishlist_id=?', $wishlistId);
-        $where[] = $connection->quoteInto('product_id in (?) ', implode(",", $productIds));
+        /**
+         * The ids are handed to quoteInto as an array, which expands them into a real list. The
+         * previous imploded string was bound as a single value, so the condition became
+         * `product_id IN ('1,2,3')` and only ever matched the first id.
+         */
+        $where[] = $connection->quoteInto('product_id IN (?)', array_map('intval', $productIds));
         $connection->delete($this->getMainTable(), $where);
         return $this;
     }

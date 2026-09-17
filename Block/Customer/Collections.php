@@ -134,7 +134,8 @@ class Collections extends Template implements IdentityInterface
      */
     public function canEditWishlist()
     {
-        return ($this->canEditWishlistFlag && ($this->getLoggedInCustomerId() == $this->getCustomer()->getId()));
+        return (bool)$this->canEditWishlistFlag
+            && (int)$this->getLoggedInCustomerId() === (int)$this->getCustomer()->getId();
     }
 
     /**
@@ -159,7 +160,12 @@ class Collections extends Template implements IdentityInterface
             return [];
         }
 
-        return $this->multipleWishlistProvider->getWishlistsForCustomer($customer->getId(), $this->canEditWishlistFlag);
+        /**
+         * The identity checked canEditWishlist() decides whether the private and unshared
+         * wishlists are included, not the raw flag: the raw flag alone let a visitor who is not
+         * the profile owner pull back rows the owner marked private.
+         */
+        return $this->multipleWishlistProvider->getWishlistsForCustomer($customer->getId(), $this->canEditWishlist());
     }
 
     /**
